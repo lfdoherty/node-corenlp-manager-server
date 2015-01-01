@@ -5,7 +5,7 @@
   "main": "server.js",
   "dependencies": {
     "json-over-tcp": "^0.3.2",
-    "stanford-corenlp": "https://github.com/lfdoherty/node-stanford-corenlp"
+    "stanford-corenlp": "git://github.com/lfdoherty/node-stanford-corenlp.git"
   },
   "description": "Server for corenlp-manager, see corenlp-manager-client.",
   "license": "MIT"
