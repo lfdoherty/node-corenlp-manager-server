@@ -1,0 +1,12 @@
+{
+  "name": "corenlp-manager-server",
+  "version": "0.0.1",
+  "author": "Liam Doherty <lfdoherty@gmail.com>",
+  "main": "server.js",
+  "dependencies": {
+    "json-over-tcp": "^0.3.2",
+    "stanford-corenlp": "https://github.com/lfdoherty/node-stanford-corenlp"
+  },
+  "description": "Server for corenlp-manager, see corenlp-manager-client.",
+  "license": "MIT"
+}
