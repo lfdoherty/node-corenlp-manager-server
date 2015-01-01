@@ -7,6 +7,10 @@
     "json-over-tcp": "^0.3.2",
     "stanford-corenlp": "git://github.com/lfdoherty/node-stanford-corenlp.git"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lfdoherty/node-corenlp-manager-server.git"
+  },
   "description": "Server for corenlp-manager, see corenlp-manager-client.",
   "license": "MIT"
 }
