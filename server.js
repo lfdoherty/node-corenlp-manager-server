@@ -45,21 +45,22 @@ server.on('connection', function (c){
 				})
 			}
 		}else if(data.type === 'process'){
-			if(data.pipeline !== openPipelineKey){
+			var pipelineKey = openPipelineIdMap[data.pipeline]
+			if(pipelineKey !== openPipelineKey){
 				//reload desired pipeline
-				createPipeline(configByKey[openPipelineIdMap[data.pipeline]], function(err, core){
+				createPipeline(configByKey[pipelineKey], function(err, core){
 					if(err){
 						console.log('Error re-making pipeline: ' + err)
 						c.write({type: 'error', errcode: 'pipeline-re-creation-error', req: data.req, err: err})
 					}else{
 						openPipeline = core
-						openPipelineKey = openPipelineIdMap[data.pipeline]
+						openPipelineKey = pipelineKey
 						doProcess(core)
 					}
 				})
 				return
 			}
-			var pipeline = openPipelines[data.pipeline]
+			var pipeline = openPipeline//openPipelines[data.pipeline]
 			if(!pipeline){
 				console.log('unknown pipeline error: ' + data.pipeline)
 				c.write({type: 'error', errcode: 'unknown-pipeline', err: 'Uknown pipeline: ' + data.pipeline})
