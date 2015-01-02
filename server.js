@@ -29,18 +29,18 @@ server.on('connection', function (c){
 			var key = JSON.stringify(data.annotators)
 			openPipelineIdMap[data.req] = key
 			if(openPipelineKey === key){
-				socket.write({type: 'pipeline-created', req: data.req, id: data.req})
+				c.write({type: 'pipeline-created', req: data.req, id: data.req})
 			}else{
 				openPipelineKey = key
 				configByKey[key] = data.annotators
 				openPipeline = undefined
 				createPipeline(data.annotators, function(err, core){
 					if(err){
-						socket.write({type: 'error', errcode: 'pipeline-creation-error', req: data.req, err: err})
+						c.write({type: 'error', errcode: 'pipeline-creation-error', req: data.req, err: err})
 						return
 					}
 					openPipeline = core//s[data.req] = core
-					socket.write({type: 'pipeline-created', req: data.req, id: data.req})
+					c.write({type: 'pipeline-created', req: data.req, id: data.req})
 				})
 			}
 		}else if(data.type === 'process'){
@@ -48,7 +48,7 @@ server.on('connection', function (c){
 				//reload desired pipeline
 				createPipeline(configByKey[openPipelineIdMap[data.pipeline]], function(err, core){
 					if(err){
-						socket.write({type: 'error', errcode: 'pipeline-re-creation-error', req: data.req, err: err})
+						c.write({type: 'error', errcode: 'pipeline-re-creation-error', req: data.req, err: err})
 					}else{
 						openPipeline = core
 						openPipelineKey = openPipelineIdMap[data.pipeline]
@@ -59,17 +59,17 @@ server.on('connection', function (c){
 			}
 			var pipeline = openPipelines[data.pipeline]
 			if(!pipeline){
-				socket.write({type: 'error', errcode: 'unknown-pipeline', err: 'Uknown pipeline: ' + data.pipeline})
+				c.write({type: 'error', errcode: 'unknown-pipeline', err: 'Uknown pipeline: ' + data.pipeline})
 				return
 			}
 			doProcess(pipeline)
 			function doProcess(pipeline){
 				pipeline.process(data.text, function(err, result){
 					if(err){
-						socket.write({type: 'error', errcode: 'process-failed', err: err})
+						c.write({type: 'error', errcode: 'process-failed', err: err})
 						return
 					}
-					socket.write({type: 'process-result', req: data.req, result: result})
+					c.write({type: 'process-result', req: data.req, result: result})
 				})
 			}
 		}/*else if(data.type === 'destroy-pipeline'){
