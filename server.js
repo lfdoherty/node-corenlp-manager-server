@@ -21,6 +21,9 @@ server.on('connection', function (c){
 	var openPipelineKey
 	var configByKey = {}
 	var openPipelineIdMap = {}
+	c.on('error', function(e){
+		console.log('socket error: ' + e)
+	})
 	c.on('data', function(data){
 		if(data.type === 'create-pipeline'){
 			var key = JSON.stringify(data.annotators)
