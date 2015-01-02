@@ -36,6 +36,7 @@ server.on('connection', function (c){
 				openPipeline = undefined
 				createPipeline(data.annotators, function(err, core){
 					if(err){
+						console.log('Error making pipeline: ' + err)
 						c.write({type: 'error', errcode: 'pipeline-creation-error', req: data.req, err: err})
 						return
 					}
@@ -48,6 +49,7 @@ server.on('connection', function (c){
 				//reload desired pipeline
 				createPipeline(configByKey[openPipelineIdMap[data.pipeline]], function(err, core){
 					if(err){
+						console.log('Error re-making pipeline: ' + err)
 						c.write({type: 'error', errcode: 'pipeline-re-creation-error', req: data.req, err: err})
 					}else{
 						openPipeline = core
@@ -59,6 +61,7 @@ server.on('connection', function (c){
 			}
 			var pipeline = openPipelines[data.pipeline]
 			if(!pipeline){
+				console.log('unknown pipeline error: ' + data.pipeline)
 				c.write({type: 'error', errcode: 'unknown-pipeline', err: 'Uknown pipeline: ' + data.pipeline})
 				return
 			}
@@ -66,6 +69,7 @@ server.on('connection', function (c){
 			function doProcess(pipeline){
 				pipeline.process(data.text, function(err, result){
 					if(err){
+						console.log('Error in process: ' + err)
 						c.write({type: 'error', errcode: 'process-failed', err: err})
 						return
 					}
