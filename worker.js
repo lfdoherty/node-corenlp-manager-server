@@ -16,6 +16,11 @@ function createPipeline(annotators, cb){
 
 process.on('message', function(m) {
 	var data = m.value
+
+	if(!expectingEnd && process.memoryUsage().heapUsed > 3*1024*1024*1024){
+		process.send({type: 'please-end'})
+	}
+
 	if(data.type === 'create-pipeline'){
 		var key = JSON.stringify(data.annotators)
 		openPipelineIdMap[data.req] = key
