@@ -71,11 +71,12 @@ server.on('connection', function (c){
 		}
 	})
 	c.on('data', function(data){
+		var msg = {sender: senderId, value: data}
 		if(data.type === 'create-pipeline'){
-			myActivePipelines.push(data)
-			activePipelines.push(data)
+			myActivePipelines.push(msg)
+			activePipelines.push(msg)
 		}
-		current_child.send({sender: senderId, value: data})
+		current_child.send(msg)
 	});
 });
 
