@@ -5,7 +5,7 @@ var jot = require('json-over-tcp');
 
 function createPipeline(annotators, cb){
 	console.log('creating pipeline: ' + JSON.stringify(annotators))
-	var coreNLP = new NLP.StanfordNLP({nlpPath:"./../stanford-corenlp-full-2014-06-16",version:"3.4",annotators: annotators},function(err) {
+	var coreNLP = new NLP.StanfordNLP({nlpPath:"./../stanford-corenlp-full-2014-10-31",version:"3.5",annotators: annotators},function(err) {
 		if(err){
 			cb(err)
 		}else{
