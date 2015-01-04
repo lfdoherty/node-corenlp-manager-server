@@ -11,7 +11,9 @@ function makeWorker(){
 	current_child.on('message', function(msg){
 		if(msg.type === 'please-end'){
 			var bk = current_child
+			console.log('received end request')
 			setTimeout(function(){
+				console.log('killed old child')
 				bk.kill()
 			},10000)
 			makeWorker()

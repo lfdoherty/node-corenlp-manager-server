@@ -23,8 +23,11 @@ var expectingEnd = false
 process.on('message', function(m) {
 	var data = m.value
 
-	if(!expectingEnd && process.memoryUsage().heapUsed > 3*1024*1024*1024){
+	var mu = process.memoryUsage()
+	console.log('memory usage: ' + JSON.stringify(mu) + ' ' + (3*1024*1024*1024))
+	if(!expectingEnd && mu.heapUsed > 3*1024*1024*1024){
 		expectingEnd = true
+		console.log('requested end')
 		process.send({type: 'please-end'})
 	}
 
