@@ -20,15 +20,19 @@ var configByKey = {}
 var openPipelineIdMap = {}
 
 var expectingEnd = false
+var cycle = 0
 process.on('message', function(m) {
 	var data = m.value
 
-	var mu = process.memoryUsage()
-	console.log('memory usage: ' + JSON.stringify(mu) + ' ' + (3*1024*1024*1024))
-	if(!expectingEnd && mu.heapUsed > 3*1024*1024*1024){
-		expectingEnd = true
-		console.log('requested end')
-		process.send({type: 'please-end'})
+	++cycle
+	if(cycle % 100 === 0){
+		var mu = process.memoryUsage()
+		//console.log('memory usage: ' + JSON.stringify(mu) + ' ' + (3.5*1024*1024*1024))
+		if(!expectingEnd && mu.rss > 3.5*1024*1024*1024){
+			expectingEnd = true
+			console.log('requested end: ' + JSON.stringify(mu) + ' ' + (3.5*1024*1024*1024))
+			process.send({type: 'please-end'})
+		}
 	}
 
 	if(data.type === 'create-pipeline'){
