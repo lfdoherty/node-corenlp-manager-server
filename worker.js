@@ -63,9 +63,9 @@ process.on('message', function(m) {
 	if(cycle % 100 === 0){
 		var mu = process.memoryUsage()
 		//console.log('memory usage: ' + JSON.stringify(mu) + ' ' + (3.5*1024*1024*1024))
-		if(!expectingEnd && mu.rss > 3.5*1024*1024*1024){
+		if(!expectingEnd && mu.rss > 3*1024*1024*1024){
 			expectingEnd = true
-			console.log('requested end: ' + JSON.stringify(mu) + ' ' + (3.5*1024*1024*1024))
+			console.log('requested end: ' + JSON.stringify(mu) + ' ' + (3*1024*1024*1024))
 			process.send({type: 'please-end'})
 		}
 	}
