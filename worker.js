@@ -14,6 +14,11 @@ function createPipeline(annotators, cb){
 	});
 }
 
+var openPipeline
+var openPipelineKey
+var configByKey = {}
+var openPipelineIdMap = {}
+
 var expectingEnd = false
 process.on('message', function(m) {
 	var data = m.value
@@ -86,10 +91,6 @@ var port = 8199
 var server = jot.createServer(port);
 
 server.on('connection', function (c){
-	var openPipeline
-	var openPipelineKey
-	var configByKey = {}
-	var openPipelineIdMap = {}
 	c.on('error', function(e){
 		console.log('socket error: ' + e)
 	})
