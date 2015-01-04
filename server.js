@@ -16,7 +16,7 @@ function makeWorker(){
 			console.log('received end request')
 			setTimeout(function(){
 				console.log('killed old child')
-				bk.kill()
+				bk.kill('SIGKILL')
 			},10000)
 			makeWorker()
 		}else{
@@ -34,6 +34,7 @@ function makeWorker(){
 			})
 		}
 	})
+	console.log('resending active pipelines: ' + JSON.stringify(activePipelines))
 	activePipelines.forEach(function(msg){
 		current_child.send(msg)
 	})
@@ -53,7 +54,7 @@ server.on('connection', function (c){
 	c.on('end', clean)
 
 	function clean(){
-		console.log('cleaning up active pipelines for connection')
+		console.log('cleaning up active pipelines for connection: '+myActivePipelines.length)
 		myActivePipelines.forEach(function(p){
 			activePipelines.splice(activePipelines.indexOf(p),1)
 		})
@@ -70,7 +71,7 @@ server.on('connection', function (c){
 		}
 	})
 	c.on('data', function(data){
-		if(data.type === 'pipeline-created'){
+		if(data.type === 'create-pipeline'){
 			myActivePipelines.push(data)
 			activePipelines.push(data)
 		}
