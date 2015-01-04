@@ -4,6 +4,8 @@ var jot = require('json-over-tcp');
 var port = 8099
 var server = jot.createServer(port);
 
+var activePipelines = []
+
 var child_process = require('child_process')
 var current_child
 function makeWorker(){
@@ -32,6 +34,9 @@ function makeWorker(){
 			})
 		}
 	})
+	activePipelines.forEach(function(msg){
+		current_child.send(msg)
+	})
 }
 
 var listeners = []
@@ -39,15 +44,25 @@ var idCounter = 1
 makeWorker()
 
 server.on('connection', function (c){
-	var openPipeline
-	var openPipelineKey
-	var configByKey = {}
-	var openPipelineIdMap = {}
+
 	c.on('error', function(e){
 		console.log('socket error: ' + e)
+		clean()
 	})
+	c.on('close', clean)
+	c.on('end', clean)
+
+	function clean(){
+		console.log('cleaning up active pipelines for connection')
+		myActivePipelines.forEach(function(p){
+			activePipelines.splice(activePipelines.indexOf(p),1)
+		})
+		myActivePipelines = []
+	}
 
 	var senderId = ++idCounter
+
+	var myActivePipelines = []
 
 	listeners.push(function(msg){
 		if(msg.sender === senderId){
@@ -55,6 +70,10 @@ server.on('connection', function (c){
 		}
 	})
 	c.on('data', function(data){
+		if(data.type === 'pipeline-created'){
+			myActivePipelines.push(data)
+			activePipelines.push(data)
+		}
 		current_child.send({sender: senderId, value: data})
 	});
 });
