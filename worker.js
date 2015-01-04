@@ -14,10 +14,12 @@ function createPipeline(annotators, cb){
 	});
 }
 
+var expectingEnd = false
 process.on('message', function(m) {
 	var data = m.value
 
 	if(!expectingEnd && process.memoryUsage().heapUsed > 3*1024*1024*1024){
+		expectingEnd = true
 		process.send({type: 'please-end'})
 	}
 
