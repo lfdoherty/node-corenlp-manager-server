@@ -22,14 +22,14 @@ var openingPipelineBuffer = {}
 var expectingEnd = false
 var cycle = 0
 
-function processData(data){
+function processData(data, sender){
 	var pipelineKey = openPipelineIdMap[data.pipeline]
 	if(pipelineKey !== openPipelineKey){
 		//reload desired pipeline
 		createPipeline(configByKey[pipelineKey], function(err, core){
 			if(err){
 				console.log('Error re-making pipeline: ' + err)
-				process.send({sender: m.sender, type: 'error', errcode: 'pipeline-re-creation-error', req: data.req, err: err})
+				process.send({sender: sender, type: 'error', errcode: 'pipeline-re-creation-error', req: data.req, err: err})
 			}else{
 				openPipeline = core
 				openPipelineKey = pipelineKey
@@ -41,7 +41,7 @@ function processData(data){
 	var pipeline = openPipeline//openPipelines[data.pipeline]
 	if(!pipeline){
 		console.log('unknown pipeline error: ' + data.pipeline)
-		process.send({sender: m.sender, type: 'error', errcode: 'unknown-pipeline', err: 'Uknown pipeline: ' + data.pipeline})
+		process.send({sender: sender, type: 'error', errcode: 'unknown-pipeline', err: 'Uknown pipeline: ' + data.pipeline})
 		return
 	}
 	doProcess(pipeline)
@@ -49,10 +49,10 @@ function processData(data){
 		pipeline.process(data.text, function(err, result){
 			if(err){
 				console.log('Error in process: ' + err)
-				process.send({sender: m.sender, type: 'error', errcode: 'process-failed', err: err})
+				process.send({sender: sender, type: 'error', errcode: 'process-failed', err: err})
 				return
 			}
-			process.send({sender: m.sender, type: 'process-result', req: data.req, result: result})
+			process.send({sender: sender, type: 'process-result', req: data.req, result: result})
 		})
 	}
 }
@@ -91,17 +91,17 @@ process.on('message', function(m) {
 
 				var buf = openingPipelineBuffer[key]
 				delete openingPipelineBuffer[key]
-				buf.forEach(function(data){
-					processData(data)
+				buf.forEach(function(m){
+					processData(m.value,m.sender)
 				})
 			})
 		}
 	}else if(data.type === 'process'){
 		var pipelineKey = openPipelineIdMap[data.pipeline]
 		if(openingPipelineBuffer[pipelineKey]){
-			openingPipelineBuffer[pipelineKey].push(data)
+			openingPipelineBuffer[pipelineKey].push(m)
 		}else{
-			processData(data)
+			processData(data, m.sender)
 		}
 	}else{
 		console.log('unknown request type: ' + data.type)
