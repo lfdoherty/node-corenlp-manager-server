@@ -1,8 +1,8 @@
 
-var NLP = require('stanford-corenlp');
+//var NLP = require('stanford-corenlp');
 
 var jot = require('json-over-tcp');
-
+/*
 function createPipeline(annotators, cb){
 	console.log('creating pipeline: ' + JSON.stringify(annotators))
 	var coreNLP = new NLP.StanfordNLP({nlpPath:"./../stanford-corenlp-full-2014-10-31",version:"3.5.0",annotators: annotators},function(err) {
@@ -13,10 +13,20 @@ function createPipeline(annotators, cb){
 		}
 	});
 }
-
+*/
 var port = 8099
 var server = jot.createServer(port);
 
+var child_process = require('child_process')
+var current_child
+function makeWorker(){
+	if(current_child){
+		current_child.kill()
+	}
+	current_child = child_process.fork('./worker')//, [args], [options])#
+}
+makeWorker()
+var idCounter = 1
 server.on('connection', function (c){
 	var openPipeline
 	var openPipelineKey
@@ -25,8 +35,20 @@ server.on('connection', function (c){
 	c.on('error', function(e){
 		console.log('socket error: ' + e)
 	})
+
+	var senderId = ++idCounter
+
+	current_child.on('message', function(msg){
+		if(msg.sender === senderId){
+			c.write(msg)
+		}
+	})
 	c.on('data', function(data){
-		if(data.type === 'create-pipeline'){
+
+		//var id = ++idCounter
+		current_child.send({sender: senderId, value: data})
+		
+		/*if(data.type === 'create-pipeline'){
 			var key = JSON.stringify(data.annotators)
 			openPipelineIdMap[data.req] = key
 			if(openPipelineKey === key){
@@ -78,17 +100,9 @@ server.on('connection', function (c){
 					c.write({type: 'process-result', req: data.req, result: result})
 				})
 			}
-		}/*else if(data.type === 'destroy-pipeline'){
-			var pipeline = openPipelines[data.pipeline]
-			if(!pipeline){
-				socket.write({type: 'error', errcode: 'unknown-pipeline', err: 'Uknown pipeline: ' + data.pipeline})
-				return
-			}
-			delete openPipelines[data.pipeline]
-			socket.write({type: 'pipeline-destroyed', req: data.req, pipeline: data.pipeline})
-		}*/else{
+		}else{
 			console.log('unknown request type: ' + data.type)
-		}
+		}*/
 	});
 });
 
