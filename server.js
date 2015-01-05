@@ -17,7 +17,7 @@ function makeWorker(){
 			setTimeout(function(){
 				console.log('killed old child')
 				bk.kill('SIGKILL')
-			},10000)
+			},60000)
 			makeWorker()
 		}else{
 			var listenersToRemove = []
